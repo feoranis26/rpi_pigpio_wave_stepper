@@ -38,12 +38,17 @@ void Stepper::wait_speed_reached(){
 
 us_t Stepper::_get_next_state_change_us()
 {
+    //if(position == target && isnan(target_speed))
+    //    return 0;
+
+    //double dist_since_start = 0.5 * (speed*speed / acc);
+    //double needed_speed = sqrt(2*acc*dist_since_start);
+
+
     if (abs(speed) <= 1.0)
         return 0;
 
     us_t us_per_step = (us_t)(1000000.0 / abs(speed));
-    // printf("Next step: %lld\n", us_per_step + last_step_us);
-    // printf("Last step: %lld\n", last_step_us);
     return us_per_step + last_step_us;
 }
 
@@ -75,9 +80,6 @@ void Stepper::_update_speed(us_t current_us)
 
     double dist_to_stop = (speed * speed / (acc * 2)) * (speed > 0 ? 1 : -1);
 
-    // printf("Time delta: %f\n", time_delta);
-    // printf("Speed: %f\n", speed);
-
     if (position + dist_to_stop > target)
         speed -= acc * time_delta;
     else
@@ -107,14 +109,9 @@ step_pulse Stepper::_step_now(us_t current_us)
         pulse.down |= 1 << pin_dir;
 
     last_dir = speed > 0;
-    // printf("Position: %d\n", position);
-    // printf("Speed: %f\n", speed);
 
     if (speed != 0)
         position += speed > 0 ? 1 : -1;
-
-    // printf("Speed: %f\n", speed);
-    // printf("US: %lld\n", current_us);
 
     if (position == target && isnan(target_speed))
     {
@@ -122,9 +119,6 @@ step_pulse Stepper::_step_now(us_t current_us)
         return pulse;
     }
 
-    // printf("Pulse up: %d, down: %d\n", pulse.up, pulse.down);
-    // printf("Pulse up: %d\n", 1 << pin_step);
-    // printf("State: %d\n", state);
     return pulse;
 }
 
